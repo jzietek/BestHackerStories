@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using BestHackerStories.Service;
 using BestHackerStories.Shared.DataTransferObjects;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BestHackerStories.Api.Controllers
@@ -25,7 +20,7 @@ namespace BestHackerStories.Api.Controllers
         [HttpGet(Name = "GetBestStories")]
         public async Task<IActionResult> GetBestStories(int? maxItems)
         {
-            IEnumerable<StoryDto> results = await _bestStoriesService.GetBestStories(maxItems ?? 10); //TODO configurable default limit
+            IEnumerable<StoryDto> results = await _bestStoriesService.GetBestStories(maxItems);
             return Ok(results);
         }
     }

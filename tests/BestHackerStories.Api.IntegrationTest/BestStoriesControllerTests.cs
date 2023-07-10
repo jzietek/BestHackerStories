@@ -34,7 +34,7 @@ public class Tests
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
         var stories = await response.Content.ReadFromJsonAsync<IEnumerable<StoryDto>>();
         stories.Should().NotBeNull();
-        stories!.Count().Should().Be(10);
+        stories!.Count().Should().Be(20);
     }
 
     [Test]
