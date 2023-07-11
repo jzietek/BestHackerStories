@@ -18,9 +18,9 @@ namespace BestHackerStories.Api.Controllers
         }
 
         [HttpGet(Name = "GetBestStories")]
-        public async Task<IActionResult> GetBestStories(int? maxItems)
+        public async Task<IActionResult> GetBestStories(int? maxItems, CancellationToken cancellationToken)
         {
-            IEnumerable<StoryDto> results = await _bestStoriesService.GetBestStories(maxItems);
+            IEnumerable<StoryDto> results = await _bestStoriesService.GetBestStories(maxItems, cancellationToken);
             return Ok(results);
         }
     }

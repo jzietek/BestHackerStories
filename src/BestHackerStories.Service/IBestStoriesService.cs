@@ -4,5 +4,5 @@ namespace BestHackerStories.Service;
 
 public interface IBestStoriesService
 {
-    Task<IEnumerable<StoryDto>> GetBestStories(int? maxItems);
+    Task<IEnumerable<StoryDto>> GetBestStories(int? maxItems, CancellationToken cancellationToken);
 }

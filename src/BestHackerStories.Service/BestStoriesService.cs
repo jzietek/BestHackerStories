@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.Http.Json;
+using System.Threading;
 using BestHackerStories.Service.InternalDtos;
 using BestHackerStories.Shared.DataTransferObjects;
 using Microsoft.Extensions.Configuration;
@@ -29,9 +30,9 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
         _httpClient?.Dispose();
     }
 
-    public async Task<IEnumerable<StoryDto>> GetBestStories(int? maxItems)
+    public async Task<IEnumerable<StoryDto>> GetBestStories(int? maxItems, CancellationToken cancellationToken)
     {
-        var bestStoriesIds = await GetBestStoriesIds();
+        var bestStoriesIds = await GetBestStoriesIds(cancellationToken);
 
         using (var semaphore = new SemaphoreSlim(initialCount: _maxCrawlerThreads, maxCount: _maxCrawlerThreads))
         {
@@ -41,7 +42,7 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
                 await semaphore.WaitAsync();
                 try
                 {
-                    HackerNewsStoryDto? internalStory = await GetHackerNewsStory(id);
+                    HackerNewsStoryDto? internalStory = await GetHackerNewsStory(id, cancellationToken);
                     if (internalStory is null)
                         return;
 
@@ -60,10 +61,10 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
         }
     }
 
-    private async Task<HackerNewsStoryDto?> GetHackerNewsStory(int id)
+    private async Task<HackerNewsStoryDto?> GetHackerNewsStory(int id, CancellationToken cancellationToken)
     {
         var uri = string.Format(_storyUrlFormat, id);
-        var response = await _httpClient.GetAsync(uri);
+        var response = await _httpClient.GetAsync(uri, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<HackerNewsStoryDto>();
@@ -82,9 +83,12 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
         );
     }
 
-    private async Task<IEnumerable<int>> GetBestStoriesIds()
+    private async Task<IEnumerable<int>> GetBestStoriesIds(CancellationToken cancellationToken)
     {
-        var response = await _httpClient.GetAsync(_bestStoriesUrl);
+        var response = await _httpClient.GetAsync(_bestStoriesUrl, cancellationToken);
+
+        await Task.Delay(10000, cancellationToken);
+
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<int[]>() ?? Enumerable.Empty<int>();
     }    
