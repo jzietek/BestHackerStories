@@ -64,7 +64,7 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
             Title: input.Title,
             Uri: input.Url,
             PostedBy: input.By,
-            Time: DateTimeOffset.FromUnixTimeSeconds(input.Time),
+            Time: DateTimeOffset.FromUnixTimeSeconds(input.Time).ToString("yyyy-MM-ddTHH:mm:sszzz"),
             Score: input.Score,
             CommentCount: input.Kids.Count()
         );

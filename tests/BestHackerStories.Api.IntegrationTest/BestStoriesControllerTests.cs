@@ -63,4 +63,18 @@ public class Tests
         var orderedStories = stories!.OrderByDescending(s => s.Score).ToArray();
         stories.Should().BeEquivalentTo(orderedStories, options => options.WithStrictOrdering());
     }
+
+    [Test]
+    public async Task SucceedsWithWellFormattedTime()
+    {
+        var response = await _client.GetAsync("/api/beststories?maxItems=10");
+
+        response.Should().NotBeNull();
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+        var stories = await response.Content.ReadFromJsonAsync<IEnumerable<StoryDto>>();
+        stories.Should().NotBeNull();
+
+        stories!.Select(story => story.Time)
+            .All(time => DateTime.TryParse(time, out var dummy)).Should().BeTrue();
+    }
 }
