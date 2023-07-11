@@ -87,8 +87,6 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
     {
         var response = await _httpClient.GetAsync(_bestStoriesUrl, cancellationToken);
 
-        await Task.Delay(10000, cancellationToken);
-
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<int[]>() ?? Enumerable.Empty<int>();
     }    
