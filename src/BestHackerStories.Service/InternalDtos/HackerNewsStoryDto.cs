@@ -6,7 +6,7 @@ public record HackerNewsStoryDto(
         int Id,
         int[] Kids,
         int Score,
-        long Time,
+        long Time, //Creation time, Linux Epoch date UTC
         string Title,
         string Type,
         string Url

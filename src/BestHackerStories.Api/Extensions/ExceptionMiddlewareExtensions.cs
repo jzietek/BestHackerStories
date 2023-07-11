@@ -5,7 +5,7 @@ namespace BestHackerStories.Api.Extensions;
 
 public static class ExceptionMiddlewareExtensions
 {
-    public static void ConfigureExceptionHandler(this WebApplication app, ILogger logger)
+    public static void ConfigureExceptionHandler(this WebApplication app, ILogger? logger)
     {
         app.UseExceptionHandler(appError =>
         {
@@ -23,7 +23,7 @@ public static class ExceptionMiddlewareExtensions
                         _ => StatusCodes.Status500InternalServerError
                     };
 
-                    logger.LogError($"Something went wrong: {contextFeature.Error}");
+                    logger?.LogError($"Something went wrong: {contextFeature.Error}");
 
                     await context.Response.WriteAsync(new ErrorDto()
                     {
