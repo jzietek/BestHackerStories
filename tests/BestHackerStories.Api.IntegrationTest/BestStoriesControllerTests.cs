@@ -34,7 +34,7 @@ public class Tests
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
         var stories = await response.Content.ReadFromJsonAsync<IEnumerable<StoryDto>>();
         stories.Should().NotBeNull();
-        stories!.Count().Should().Be(20);
+        stories!.Count().Should().Be(200);
     }
 
     [Test]
@@ -47,5 +47,20 @@ public class Tests
         var stories = await response.Content.ReadFromJsonAsync<IEnumerable<StoryDto>>();
         stories.Should().NotBeNull();
         stories!.Count().Should().Be(2);
+    }
+
+    [Test]
+    public async Task SucceedsWithCorrectOrdering()
+    {
+        var response = await _client.GetAsync("/api/beststories?maxItems=100");
+
+        response.Should().NotBeNull();
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+        var stories = await response.Content.ReadFromJsonAsync<IEnumerable<StoryDto>>();
+        stories.Should().NotBeNull();
+        stories!.Count().Should().Be(100);
+
+        var orderedStories = stories!.OrderByDescending(s => s.Score).ToArray();
+        stories.Should().BeEquivalentTo(orderedStories, options => options.WithStrictOrdering());
     }
 }
