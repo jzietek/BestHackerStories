@@ -21,6 +21,11 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
         _httpClient = clientFactory.CreateClient();
     }
 
+    public void Dispose()
+    {
+        _httpClient?.Dispose();
+    }
+
     public async Task<IEnumerable<StoryDto>> GetBestStories(int? maxItems)
     {
         var bestStoriesIds = await GetBestStoriesIds();
@@ -33,7 +38,10 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
                 await semaphore.WaitAsync();
                 try
                 {
-                    HackerNewsStoryDto internalStory = await GetHackerNewsStory(id);
+                    HackerNewsStoryDto? internalStory = await GetHackerNewsStory(id);
+                    if (internalStory is null)
+                        return;
+
                     StoryDto mappedStory = MapStory(internalStory);
                     responses.Add(mappedStory);
                 }
@@ -49,7 +57,7 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
         }
     }
 
-    private async Task<HackerNewsStoryDto> GetHackerNewsStory(int id)
+    private async Task<HackerNewsStoryDto?> GetHackerNewsStory(int id)
     {
         var uri = string.Format(_storyUrlFormat, id);
         var response = await _httpClient.GetAsync(uri);
@@ -60,11 +68,12 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
 
     private StoryDto MapStory(HackerNewsStoryDto input)
     {
+        string time = DateTimeOffset.FromUnixTimeSeconds(input.Time).ToString("yyyy-MM-ddTHH:mm:sszzz");
         return new StoryDto(        
             Title: input.Title,
             Uri: input.Url,
             PostedBy: input.By,
-            Time: DateTimeOffset.FromUnixTimeSeconds(input.Time).ToString("yyyy-MM-ddTHH:mm:sszzz"),
+            Time: time,
             Score: input.Score,
             CommentCount: input.Kids.Count()
         );
@@ -75,10 +84,5 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
         var response = await _httpClient.GetAsync(_bestStoriesUrl);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<int[]>() ?? Enumerable.Empty<int>();
-    }
-
-    public void Dispose()
-    {
-        _httpClient?.Dispose();
-    }
+    }    
 }
