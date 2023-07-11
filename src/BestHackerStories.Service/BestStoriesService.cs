@@ -18,7 +18,10 @@ public sealed class BestStoriesService : IBestStoriesService, IDisposable
         _bestStoriesUrl = configuration["HackerNews:BestStoriesUrl"] ?? throw new ArgumentNullException("HackerNews:BestStoriesUrl");
         _storyUrlFormat = configuration["HackerNews:StoryUrlFormat"] ?? throw new ArgumentNullException("HackerNews:StoryUrlFormat");
         _maxCrawlerThreads = int.Parse(configuration["HackerNews:MaxCrawlerThreads"] ?? "MISSING");
+
+        TimeSpan crawlerTimeout = TimeSpan.Parse(configuration["HackerNews:CrawlerTimeout"] ?? "MISSING");
         _httpClient = clientFactory.CreateClient();
+        _httpClient.Timeout = crawlerTimeout;
     }
 
     public void Dispose()
